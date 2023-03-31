@@ -23,4 +23,5 @@
 11. estrazione elementi venduti in una certa fattura
 12. estrazione dettaglio riga fattura
 13. download PDF (binario) fattura
-14. estrazione delle fatture in cui viene venduto un certo prodotto
+14. inserimento o aggiornamento del PDF (binario) di una certa fattura
+15. estrazione delle fatture in cui viene venduto un certo prodotto
