@@ -22,7 +22,7 @@ Tutte le API accettano/restituiscono JSON se non altrimenti specificato
             "prezzoUnitario":1.23,
             "quantita":1.23,
             "unitaDiMisura":"ABC",
-            "aliquotaIVA":22
+            "aliquotaIVA":22,
             "prezzoTotale":1.23        
         }
     ],
