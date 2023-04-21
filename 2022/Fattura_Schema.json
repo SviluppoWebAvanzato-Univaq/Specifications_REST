@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "$id": "https://www.univaq.it/f3i/swa/examples/schema_fattura.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "data",
+    "numero",
+    "intestatario",
+    "elementi",
+    "totali"
+  ],
+  "properties": {
+    "data": {
+      "type": "string",
+      "examples": [
+        "2022-03-25"
+      ],
+      "format": "date"
+    },
+    "numero": {
+      "type": "integer",
+      "examples": [
+        123
+      ],
+      "minimum": 1
+    },
+    "intestatario": {
+      "title": "Anagrafica",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ragioneSociale",
+        "partitaIVA",
+        "indirizzo"
+      ],
+      "properties": {
+        "ragioneSociale": {
+          "type": "string"
+        },
+        "partitaIVA": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "indirizzo": {
+          "type": "string"
+        }
+      }
+    },
+    "elementi": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "title": "Prodotto",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "codice",
+          "descrizione",
+          "prezzoUnitario",
+          "quantita",
+          "unitaDiMisura",
+          "aliquotaIVA",
+          "prezzoTotale"
+        ],
+        "properties": {
+          "codice": {
+            "type": "string"
+          },
+          "descrizione": {
+            "title": "Descrizione",
+            "type": "string"
+          },
+          "prezzoUnitario": {
+            "type": "number"
+          },
+          "quantita": {
+            "type": "number",
+            "minimum": 1
+          },
+          "unitaDiMisura": {
+            "enum": [
+              "kg",
+              "m",
+              "pz",
+              "g",
+              "cm",
+              "l"
+            ]
+          },
+          "aliquotaIVA": {
+            "title": "Percentuale",
+            "type": "integer",
+            "mimimum": 0,
+            "maximum": 100
+          },
+          "prezzoTotale": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "totali": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "totaleIVAEsclusa",
+        "totaleIVA",
+        "totaleIVAInclusa"
+      ],
+      "properties": {
+        "totaleIVAEsclusa": {
+          "type": "number"
+        },
+        "totaleIVA": {
+          "type": "number"
+        },
+        "totaleIVAInclusa": {
+          "type": "number"
+        }
+      }
+    }
+  }
+}
