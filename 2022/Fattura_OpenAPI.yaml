@@ -1,0 +1,418 @@
+openapi: 3.0.1
+info:
+  title: Corso di Sviluppo Web Avanzato - Esempio Fatture
+  contact:
+    email: giuseppe.dellapenna@univaq.it
+  version: '1.0'
+servers:
+  - url: 'http://localhost:8080/FatturaREST'
+  - url: 'http://localhost/FatturaREST_PHP/public'
+paths:
+  '/rest/fatture':
+    get:
+      operationId: getFatture
+      tags: 
+        - collezione fatture
+      parameters:
+        - $ref: '#/components/parameters/pagerFrom'
+        - $ref: '#/components/parameters/pagerTo'
+        - name: pIVA
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: codiceProdotto
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: lista di elementi base fatture
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListaFattureMinimale'
+        '500':
+          $ref: '#/components/responses/GeneralError'
+    post:
+      operationId: addFattura
+      tags: 
+        - collezione fatture
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Fattura'
+      responses:
+        '201':
+          description: created
+          headers:
+            location:
+              schema:
+                type: string
+                format: uri
+          content:
+            application/json:
+              schema:
+                type: string
+                format: uri
+        '500':
+          $ref: '#/components/responses/GeneralError'
+  '/rest/fatture/{anno}/{numero}':
+    parameters:
+      - $ref: '#/components/parameters/annoFatture'
+      - $ref: '#/components/parameters/numeroFattura'  
+    get:
+      operationId: getFattura
+      tags: 
+        - item fattura
+      responses:
+        '200':
+          description: una fattura
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fattura'
+        '500':
+          $ref: '#/components/responses/GeneralError'
+        '404':
+          $ref: '#/components/responses/NotFound'        
+    put:
+      operationId: updateFattura
+      tags: 
+        - item fattura      
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Fattura'
+      responses:
+        '204':
+          description: no content
+        '500':
+          $ref: '#/components/responses/GeneralError'
+        '404':
+          $ref: '#/components/responses/NotFound'        
+    delete:
+      operationId: deleteFattura
+      tags: 
+        - item fattura      
+      responses:
+        '204':
+          description: no content
+        '500':
+          $ref: '#/components/responses/GeneralError'
+        '404':
+          $ref: '#/components/responses/NotFound'        
+  '/rest/fatture/{anno}/{numero}/attachment':
+    get:
+      operationId: getAttachment
+      tags: 
+        - item fattura
+      parameters:
+        - $ref: '#/components/parameters/annoFatture'
+        - $ref: '#/components/parameters/numeroFattura'  
+      responses:
+        default:
+          description: fattura in PDF
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '500':
+          $ref: '#/components/responses/GeneralError'
+        '404':
+          $ref: '#/components/responses/NotFound'        
+  '/rest/fatture/{anno}/{numero}/pIVA':
+    get:
+      operationId: getPIvaFattura
+      tags: 
+        - item fattura      
+      parameters:
+        - $ref: '#/components/parameters/annoFatture'
+        - $ref: '#/components/parameters/numeroFattura'  
+      responses:
+        '200':
+          description: partita IVA fattura
+          content:
+            application/json: 
+              schema:
+                type: integer
+                format: int32
+        '500':
+          $ref: '#/components/responses/GeneralError'
+        '404':
+          $ref: '#/components/responses/NotFound'        
+  '/rest/fatture/{anno}/{numero}/elementi':
+    get:
+      operationId: getElementiFattura
+      tags: 
+        - item fattura
+        - collezione elementi fattura
+      parameters:
+        - $ref: '#/components/parameters/annoFatture'
+        - $ref: '#/components/parameters/numeroFattura'  
+      responses:
+        '200':
+          description: lista elementi fattura
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items: 
+                  $ref: '#/components/schemas/Elemento'
+        '500':
+          $ref: '#/components/responses/GeneralError'
+        '404':
+          $ref: '#/components/responses/NotFound'        
+  '/rest/fatture/{anno}/{numero}/elementi/{riga}':
+    get:
+      operationId: getElementoFattura
+      tags: 
+        - item fattura
+        - collezione elementi fattura      
+      parameters:
+        - name: riga
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - $ref: '#/components/parameters/annoFatture'
+        - $ref: '#/components/parameters/numeroFattura'  
+      responses:
+        '200':
+          description: dettaglio elemento fattura
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Elemento'
+        '500':
+          $ref: '#/components/responses/GeneralError'
+        '404':
+          $ref: '#/components/responses/NotFound'        
+  '/rest/fatture/{anno}':
+    get:
+      operationId: getFattureAnno
+      tags: 
+        - collezione fatture
+      security:
+        - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/annoFatture'
+      - $ref: '#/components/parameters/pagerFrom'
+      - $ref: '#/components/parameters/pagerTo'
+      responses:
+        '200':
+          description: lista fatture per anno
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListaFattureMinimale'
+        '500':
+          $ref: '#/components/responses/GeneralError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'          
+  '/rest/fatture/count':
+    get:
+      operationId: getNumeroFatture
+      tags: 
+        - collezione fatture      
+      parameters:
+        - name: pIVA
+          in: query
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: conteggio fatture
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int32      
+        '500':
+          $ref: '#/components/responses/GeneralError'
+  '/rest/auth/login':
+    post:
+      operationId: doLogin
+      tags: 
+        - autenticazione      
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: successful login
+          content:
+            text/plain:
+              schema:
+                type: string
+          headers:
+            Authorization:
+              schema:
+                type: string
+                pattern: 'Bearer [a-z0-9A-Z-]+'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/GeneralError'
+  '/rest/auth/logout':
+    delete:
+      operationId: doLogout
+      tags: 
+        - autenticazione      
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: successful logout
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'          
+        '500':
+          $ref: '#/components/responses/GeneralError'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: internalToken
+  responses:
+    GeneralError:
+      description: errore generale
+      content:
+        text/plain:
+          schema:
+            type: string
+            example: "Messaggio di Errore"
+    UnauthorizedError:
+      description: bearer token mancante o non valido
+    NotFound:
+      description: elemento non trovato
+      content:
+        text/plain:
+          schema:
+            type: string
+            example: "Elemento inesistente"            
+  parameters:
+    pagerFrom:
+      name: from
+      in: query
+      required: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 0
+        default: 0
+    pagerTo:
+      name: to
+      in: query
+      required: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 0
+    annoFatture:
+      name: anno
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int32
+    numeroFattura:
+      name: numero
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int32        
+  schemas:
+    Anagrafica:
+      type: object
+      properties:
+        ragioneSociale:
+          type: string
+        partitaIVA:
+          type: string
+        via:
+          type: string
+        citta:
+          type: string
+        civico:
+          type: string
+    Elemento:
+      type: object
+      properties:
+        codice:
+          type: string
+        descrizione:
+          type: string
+        quantita:
+          type: integer
+          format: int32
+        unitaDiMisura:
+          type: string
+        prezzoUnitario:
+          type: number
+          format: float
+        prezzoTotale:
+          type: number
+          format: float
+        aliquotaIVA:
+          type: number
+          format: int32          
+    Fattura:
+      type: object
+      properties:
+        numero:
+          type: integer
+          format: int32
+        data:
+          type: string
+          format: date-time
+        intestatario:
+          $ref: '#/components/schemas/Anagrafica'
+        elementi:
+          type: array
+          items:
+            $ref: '#/components/schemas/Elemento'
+        totali:
+          type: object
+          properties:
+            totaleIVAEsclusa:
+              type: number
+              format: float
+            totaleIVA:
+              type: number
+              format: float
+            totaleIVAInclusa:
+              type: number
+              format: float
+    ListaFattureMinimale:
+      type: array
+      items: 
+        type: object
+        properties:
+          data:
+            type: string
+            format: date
+          numero:
+            type: number
+            format: int32
+          totaleIVAInclusa:
+            type: number
+            format: float
+          url:
+            type: string
+            format: uri
