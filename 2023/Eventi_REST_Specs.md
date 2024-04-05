@@ -3,7 +3,7 @@
 ## Formato evento
 
 - identificativo unico,
-- data/ora inizio e fine *(data e ora, formato ISO)*,
+- data/ora inizio e fine *(data e ora, formato ISO, ad esempio 2024-04-10T13:48:48+02:00)*,
 - descrizione,
 - luogo,
 - lista categorie *(stringhe/tag)*,
