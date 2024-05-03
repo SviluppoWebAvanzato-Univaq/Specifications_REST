@@ -1,0 +1,528 @@
+openapi: 3.0.1
+info:
+  title: Event Manager
+  contact:
+    email: giuseppe.dellapenna@univaq.it
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: '0.1'
+externalDocs:
+  description: Sviluppo Web Avanzato Course Pages
+  url: https://sviluppowebavanzato.github.io
+servers:
+  - url: http://localhost:8080/EventsREST
+  - url: http://localhost/EventsREST_PHP/public
+tags:
+  - name: Event
+    description: Operations on single events
+  - name: Events collection
+    description: Operations on the event collection
+  - name: Event properties
+    description: Operations on single event properties
+paths:
+  /rest/events:
+    get:
+      operationId: getEvents
+      description: >-
+        retrieves the events list, filtered by date range and optionally by
+        event categories
+      tags:
+        - Events collection
+      parameters:
+        - $ref: '#/components/parameters/DateFilterFrom'
+        - $ref: '#/components/parameters/DateFilterTo'
+        - $ref: '#/components/parameters/CatFilter'
+      responses:
+        '200':
+          description: Events base info list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseEventList'
+        '500':
+          $ref: '#/components/responses/GeneralError'
+    post:
+      operationId: addEvent
+      description: adds a new event
+      tags:
+        - Events collection
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Event'
+      responses:
+        '201':
+          $ref: '#/components/responses/SuccessfulInsert'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/GeneralError'
+  /rest/events/current:
+    get:
+      operationId: getCurrentEvents
+      description: >-
+        retrieves the list of current events, i.e. events that have started but
+        not yet ended, optionally filtered by event categories
+      tags:
+        - Events collection
+      parameters:
+        - $ref: '#/components/parameters/CatFilter'
+      responses:
+        '200':
+          description: Current events base info list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseEventList'
+        '500':
+          $ref: '#/components/responses/GeneralError'
+  /rest/events/count:
+    get:
+      operationId: getNumberOfEvents
+      description: >-
+        retrieves the number of events in a specified date range, optionally
+        filtered by event categories
+      tags:
+        - Events collection
+      parameters:
+        - $ref: '#/components/parameters/DateFilterFrom'
+        - $ref: '#/components/parameters/DateFilterTo'
+        - $ref: '#/components/parameters/CatFilter'
+      responses:
+        '200':
+          description: Number of events
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int32
+        '500':
+          $ref: '#/components/responses/GeneralError'
+  /rest/events/{uid}:
+    parameters:
+      - $ref: '#/components/parameters/EventUID'
+    get:
+      operationId: getEvent
+      description: retrieves the complete event information
+      tags:
+        - Event
+      responses:
+        '200':
+          description: Event info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/GeneralError'
+    patch:
+      operationId: updateEvent
+      description: updates some properties of an event
+      tags:
+        - Event
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Event'
+      responses:
+        '204':
+          description: Event updated
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/GeneralError'
+    delete:
+      operationId: deleteEvent
+      description: deletes an event
+      tags:
+        - Event
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Event deleted
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/GeneralError'
+  /rest/events/{uid}/attachment:
+    parameters:
+      - $ref: '#/components/parameters/EventUID'
+    get:
+      operationId: getAttachment
+      description: retrieves the attachment of an event (as a generic binary)
+      tags:
+        - Event
+        - Event properties
+      responses:
+        '200':
+          description: Event binary attachment
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/GeneralError'
+    put:
+      operationId: updateAttachment
+      description: updates the binary attachment of an event
+      tags:
+        - Event
+        - Event properties
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              format: binary
+      responses:
+        '204':
+          description: Attachment updated
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/GeneralError'
+  /rest/events/{uid}/recurrence:
+    parameters:
+      - $ref: '#/components/parameters/EventUID'
+    put:
+      operationId: updateRecurrence
+      description: updates the recurrence rule of an event
+      tags:
+        - Event
+        - Event properties
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Recurrence'
+      responses:
+        '204':
+          description: Recurrence updated
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/GeneralError'
+  /rest/events/{uid}/participants:
+    parameters:
+      - $ref: '#/components/parameters/EventUID'
+    get:
+      operationId: listParticipants
+      description: retrieves the list of participants for an event
+      tags:
+        - Event
+        - Event properties
+      responses:
+        '200':
+          description: Participants list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Participant'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/GeneralError'
+    post:
+      operationId: addParticipant
+      description: adds a participant to an event
+      tags:
+        - Event
+        - Event properties
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Participant'
+      responses:
+        '201':
+          $ref: '#/components/responses/SuccessfulInsert'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/GeneralError'
+  /rest/events/{uid}/participants/{partid}:
+    parameters:
+      - $ref: '#/components/parameters/EventUID'
+      - $ref: '#/components/parameters/ParticipantID'
+    delete:
+      operationId: deleteParticipant
+      description: removes a participant from an event (given the email address)
+      tags:
+        - Event
+        - Event properties
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Participant deleted
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/GeneralError'
+  /rest/auth/login:
+    post:
+      operationId: doLogin
+      description: >-
+        performs the login by sending the username/password pair and receiving
+        an authorization token
+      tags:
+        - authentication
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Successful login
+          content:
+            text/plain:
+              schema:
+                type: string
+          headers:
+            Authorization:
+              schema:
+                type: string
+                pattern: Bearer [a-z0-9A-Z-]+
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/GeneralError'
+  /rest/auth/logout:
+    delete:
+      operationId: doLogout
+      description: performs the logout
+      tags:
+        - authentication
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful logout
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/GeneralError'
+  /rest/auth/refresh:
+    get:
+      operationId: refreshToken
+      description: refreshes the current authorization token
+      tags:
+        - authentication
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: New (refreshed) token
+          content:
+            text/plain:
+              schema:
+                type: string
+          headers:
+            Authorization:
+              schema:
+                type: string
+                pattern: Bearer [a-z0-9A-Z-]+
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/GeneralError'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: internalToken
+  responses:
+    SuccessfulInsert:
+     description: Element created
+     headers:
+      location:
+        schema:
+         type: string
+         format: uri
+     content:
+      application/json:
+       schema:
+        type: string
+        format: uri
+    GeneralError:
+      description: General error
+    UnauthorizedError:
+      description: Missing or invalid bearer token
+    NotFound:
+     description: Element not found
+     content:
+      text/plain:
+       schema:
+        type: string
+        example: Not found
+  parameters:
+    DateFilterFrom:
+      name: from
+      in: query
+      required: true
+      schema:
+        type: string
+        format: date-time
+    DateFilterTo:
+      name: to
+      in: query
+      required: true
+      schema:
+        type: string
+        format: date-time
+    CatFilter:
+      name: cat
+      in: query
+      required: false
+      style: form
+      explode: false
+      schema:
+        type: array
+        items:
+          type: string
+    EventUID:
+      name: uid
+      in: path
+      required: true
+      schema:
+       $ref: '#/components/schemas/UID'
+    ParticipantID:
+      name: partid
+      in: path
+      required: true
+      schema:
+        type: string
+        format: email
+  schemas:
+    UID:
+     type: string
+     pattern: ID[a-z0-9-]+
+    Participant:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: e-mail
+      required:
+        - name
+        - email
+      additionalProperties: false
+    Recurrence:
+      type: object
+      properties:
+        count:
+          type: integer
+          format: int32
+        interval:
+          type: integer
+          format: int32
+        until:
+          type: string
+          format: date-time
+        frequency:
+          type: string
+          enum:
+            - daily
+            - weekly
+            - monthly
+            - yearly
+      required:
+        - frequency
+      additionalProperties: false
+    Event:
+      type: object
+      properties:
+        uid:
+          $ref: '#/components/schemas/UID'
+        summary:
+          type: string
+        location:
+          type: string
+        start:
+          type: string
+          format: date-time
+        end:
+          type: string
+          format: date-time
+        categories:
+          type: array
+          items:
+            type: string
+        attachment:
+          type: string
+          format: binary
+        participants:
+          type: array
+          items:
+            $ref: '#/components/schemas/Participant'
+        recurrence:
+          $ref: '#/components/schemas/Recurrence'
+      required:
+        - uid
+        - start
+        - end
+        - summary
+      additionalProperties: false
+    BaseEventList:
+      type: array
+      items:
+        type: object
+        properties:
+          uid:
+            type: string
+          summary:
+            type: string
+          start:
+            type: string
+            format: date-time
+          end:
+            type: string
+            format: date-time
+        required:
+          - uid
+          - summary
+          - start
+          - end
+        additionalProperties: true
