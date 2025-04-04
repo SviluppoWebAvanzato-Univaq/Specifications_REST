@@ -1,0 +1,23 @@
+{
+  "uid": "IDabc",
+  "summary": "Event IDabc",
+  "start": "2024-04-10T13:48:48+02:00",
+  "end": "2024-04-10T13:48:48.295207+02:00",
+  "attachment": "Y2lhbyBhIHR1dHRp",
+  "categories": ["a","b"],
+  "participants": [
+    {
+      "name": "Pinco Pallino #0",
+      "email": "pinco.pallino0@univaq.it"
+    },
+    {
+      "name": "Pinco Pallino #1",
+      "email": "pinco.pallino1@univaq.it"
+    }
+  ],
+  "recurrence": {
+    "interval": 2,
+    "until": "2024-06-10T13:48:00+02:00",
+    "frequency": "WEEKLY"
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "$id": "https://www.univaq.it/f3i/swa/examples/schema_evento.json",
+  "type": "object",
+  "properties": {
+    "uid": {
+      "type": "string",
+	  "pattern": "ID[a-z0-9]+"
+    },
+    "summary": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string"
+    },
+    "start": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "end": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "categories": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "attachment": {
+      "type": "string",
+      "format": "binary"
+    },
+    "participants": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "e-mail"
+          }
+        },
+        "required": [
+          "name",
+          "email"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "recurrence": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "interval": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "until": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "frequency": {
+          "type": "string",
+          "enum": [
+            "DAILY",
+            "WEEKLY",
+            "MONTHLY",
+            "YEARLY"
+          ]
+        }
+      },
+      "required": [
+        "frequency"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "uid",
+    "start",
+    "end",
+    "summary"
+  ],
+  "additionalProperties": false
+}
