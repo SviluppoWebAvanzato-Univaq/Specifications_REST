@@ -44,11 +44,10 @@ Tutte le API accettano/restituiscono JSON se non altrimenti specificato
 
 `GET [BASE]/events?from=2024-02-01T00:00Z&to=2024-03-01T00:00Z&cat=work,personal`
 
-##### parametri di query opzionali
+##### parametri di query
 
-- from={...}&to={...} per la paginazione
-- view={...} per selezionare i dettagli (vista) da restituire in output tra un set predefinito
-- fields=f1,f2 per definire in dettaglio i campi da restituire per ciascun elemento... da usare solo nel caso in cui si debba essere veramente generici
+- from={...}&to={...} per i limiti del periodo con cui filtrare
+- cat={...} per le categorie opzionali con cui filtrare
 
 ##### headers
 - Accept: application/json
@@ -200,6 +199,11 @@ Un oggetto evento, anche parziale.
 #### Richiesta
 
 `GET [BASE]/events/count?from=2024-02-01T00:00Z&to=2024-03-01T00:00Z&cat=work,personal`
+
+##### parametri di query
+
+- from={...}&to={...} per i limiti del periodo con cui filtrare
+- cat={...} per le categorie opzionali con cui filtrare
 
 ##### headers
 - Accept: application/json
