@@ -1,0 +1,72 @@
+{
+  "nome": "Catalogo Prodotti Alimentari",
+  "sezioni": [
+    {
+      "codice": "frutta",
+      "nome": "Frutta",
+      "descrizione": "Frutta fresca di stagione",
+      "prodotti": [
+        {
+          "codice": "P-0012",
+          "nome": "Mela Golden",
+          "prezzo": 1.49,
+          "descrizioneBreve": "Mela dolce e croccante",
+          "dettagli": {
+            "descrizioneLunga": "La Mela Golden è coltivata in Trentino e raccolta a mano.",
+            "immagine": "iVBORw0KGgoAAAANSUhEUgAAAAUA...",
+            "ingredienti": [
+              "Mela"
+            ],
+            "valoriNutrizionali": {
+              "kcal": 52,
+              "grassi": 0.2,
+              "carboidrati": 14,
+              "proteine": 0.3
+            },
+            "origine": "Italia",
+            "etichette": [
+              "bio",
+              "km0"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "codice": "XYZ789",
+      "nome": "Bevande",
+      "prodotti": [
+        {
+          "codice": "P-0100",
+          "nome": "Succo d'Arancia",
+          "prezzo": 2.99,
+          "descrizioneBreve": "100% arancia spremuta",
+          "dettagli": {
+            "ingredienti": [
+              "Succo d'arancia",
+              "Acidificante"
+            ],
+            "origine": "Spagna",
+            "modalitaConservazione": "Conservare in luogo fresco e asciutto",
+            "modalitaPreparazione": "Pronta al consumo"
+          }
+        },
+        {
+          "codice": "P-0200",
+          "nome": "Chinotto",
+          "prezzo": 3.99,
+          "disponibile": false,
+          "descrizioneBreve": "Una bevanda antica",
+          "dettagli": {
+            "ingredienti": [
+              "un",
+              "sacco",
+              "di",
+              "roba"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
