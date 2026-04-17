@@ -1,0 +1,556 @@
+openapi: 3.0.1
+info:
+  title: API Catalogo
+  contact:
+    email: giuseppe.dellapenna@univaq.it
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: '0.2'
+externalDocs:
+  description: Sviluppo Web Avanzato Course Pages
+  url: https://sviluppowebavanzato.github.io
+servers:
+  - url: http://localhost:8080/CatalogoREST
+  - url: http://localhost/CatalogoREST_PHP/
+tags:
+  - name: Prodotti
+    description: Operazioni relative ai prodotti del catalogo
+  - name: Sezioni
+    description: Operazioni relative alle sezioni del catalogo
+
+
+
+components:
+      
+  schemas:
+    ProductCode:
+      type: string
+      pattern: '^P-[A-Z0-9]{4,20}$'
+    SectionCode:
+      type: string
+    ProductBase:
+      type: object
+      properties:
+        codice:
+          $ref: '#/components/schemas/ProductCode'
+        nome:
+          type: string
+          minLength: 2
+        prezzo:
+          type: number
+          minimum: 0
+          multipleOf: 0.01
+        disponibile:
+          type: boolean
+          default: true
+        descrizioneBreve:
+          type: string
+          minLength: 5
+          maxLength: 300
+        url:
+          type: string
+    SectionHeader:
+      type: object
+      required:
+        - codice
+        - nome
+        - url
+      additionalProperties: false
+      properties:
+        codice:
+          $ref: '#/components/schemas/SectionCode'
+        nome:
+          type: string
+          minLength: 2
+        url:
+          type: string
+    Section:
+      type: object
+      required:
+        - codice
+        - nome
+        - prodotti
+      additionalProperties: false
+      properties: 
+        codice:
+          $ref: '#/components/schemas/ProductCode'
+        nome:
+          type: string
+          minLength: 2
+        descrizione:
+          type: string
+          maxLength: 500
+        prodotti:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ProductBase'
+    Product:
+      type: object
+      required:
+        - codice
+        - nome
+        - prezzo
+        - descrizioneBreve
+      additionalProperties: false
+      properties:
+        codice:
+          $ref: '#/components/schemas/ProductCode'
+        nome:
+          type: string
+          minLength: 2
+        prezzo:
+          type: number
+          minimum: 0
+          multipleOf: 0.01
+        disponibile:
+          type: boolean
+          default: true
+        descrizioneBreve:
+          type: string
+          minLength: 5
+          maxLength: 300
+        dettagli:
+          $ref: '#/components/schemas/ProductDetails'
+    ProductDetails:
+      type: object
+      additionalProperties: false
+      properties:
+        descrizioneLunga:
+          type: string
+          maxLength: 5000
+        immagine:
+          type: string
+          format: binary
+          description: 'File binario dell''immagine (es. JPEG, PNG)'
+        ingredienti:
+          type: array
+          minItems: 1
+          items:
+            type: string
+        allergeni:
+          type: array
+          items:
+            type: string
+        valoriNutrizionali:
+          type: object
+          properties:
+            kcal:
+              type: number
+              minimum: 0
+            grassi:
+              type: number
+              minimum: 0
+            carboidrati:
+              type: number
+              minimum: 0
+            proteine:
+              type: number
+              minimum: 0
+        modalitaConservazione:
+          type: string
+        modalitaPreparazione:
+          type: string
+        origine:
+          type: string
+        etichette:
+          type: array
+          items:
+            type: string
+  
+  parameters:
+    SectionCode:
+      name: sectioncode
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/SectionCode'
+    ProductCode:
+      name: productcode
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/ProductCode'  
+
+  responses:
+    Unauthorized:
+      description: Token mancante o non valido
+    NotFound:
+      description: Elemento non trovato
+    GeneralError:
+      description: Errore interno
+    Created:
+      description: Elemento creato
+      headers:
+        Location:
+          schema:
+            type: string
+    ProductList:
+      description: Lista prodotti
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/ProductBase"
+  
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: internalToken
+
+paths:
+
+  /sections:
+    get:
+      tags: [Sezioni]
+      operationId: getSections
+      summary: 1. Lettura lista sezioni ("radice" catalogo)
+      responses:
+        "200":
+          description: Lista sezioni
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SectionHeader'
+        "500":
+          $ref: '#/components/responses/GeneralError'
+
+  /sections/{sectioncode}:
+    get:
+      tags: [Sezioni]
+      operationId: getSection
+      summary: 2. Lettura dettagli di una sezione
+      parameters:
+        - $ref: '#/components/parameters/SectionCode'
+      responses:
+        "200":
+          description: Section completa
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Section'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/GeneralError'
+
+  /sections/{sectioncode}/description:
+    put:
+      tags: [Sezioni]
+      operationId: updateSectionDescription
+      summary: 3. Aggiornamento descrizione di una sezione
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/SectionCode'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: string
+      responses:
+        "204":
+          description: Descrizione aggiornata
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/GeneralError'
+
+
+  /sections/{sectioncode}/products:
+    parameters:
+      - $ref: '#/components/parameters/SectionCode'
+  
+    get:
+      tags: [Sezioni]
+      operationId: getSectionProducts
+      summary: 4. Lettura prodotti di una sezione
+      responses:
+        "200":
+          $ref: '#/components/responses/ProductList'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/GeneralError'
+  
+    post:
+      tags: [Sezioni]
+      operationId: moveProductToSection1
+      summary: 11a. Inserimento (o spostamento) di un prodotto in una sezione.
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductCode'
+      responses:
+        "201":
+          description: Prodotto inserito nella sezione
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/GeneralError'        
+
+  /sections/{sectioncode}/products/available:
+    get:
+      tags: [Sezioni]
+      operationId: getSectionProductsAvailable
+      summary: 5. Lettura dei soli prodotti di una sezione attualmente disponibili
+      parameters:
+        - $ref: '#/components/parameters/SectionCode'
+      responses:
+        "200":
+          $ref: '#/components/responses/ProductList'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/GeneralError'
+
+  /sections/{sectioncode}/products/count:
+    get:
+      tags: [Sezioni]
+      operationId: getSectionProductCount
+      summary: 6b. Calcolo numero prodotti per sezione
+      parameters:
+        - $ref: '#/components/parameters/SectionCode'
+      responses:
+        "200":
+          description: Numero prodotti della sezione
+          content:
+            application/json:
+              schema:
+                type: integer
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/GeneralError'
+
+  ############################################################
+  
+  /products:
+    post:
+      tags: [Prodotti]
+      operationId: addProduct
+      summary: 8. Inserimento di un nuovo prodotto.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Product"
+      responses:
+        "201":
+          $ref: '#/components/responses/Created'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "500":
+          $ref: '#/components/responses/GeneralError'
+
+    get:
+      tags: [Prodotti]
+      operationId: listProducts
+      summary: 12. Ricerca di prodotti per codice e/o nome e/o tag e/o sezione e/o fascia di prezzo e/o disponibilità
+      parameters:
+        - name: code
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/ProductCode'
+        - name: name
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: tag
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+           type: array
+           items:
+            type: string
+        - name: available
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: section
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/SectionCode'
+        - name: minPrice
+          in: query
+          required: false
+          schema:
+            type: number
+        - name: maxPrice
+          in: query
+          required: false
+          schema:
+            type: number
+        - name: page
+          required: false
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          $ref: '#/components/responses/ProductList'
+        "500":
+          $ref: '#/components/responses/GeneralError'
+
+  /products/count:
+    get:
+      tags: [Prodotti]
+      operationId: getProductCount
+      summary: 6a. Calcolo numero prodotti globale
+      responses:
+        "200":
+          description: Numero prodotti
+          content:
+            application/json:
+              schema:
+                type: integer
+        "500":
+          $ref: '#/components/responses/GeneralError'
+
+  /products/{productcode}:
+    parameters:
+      - $ref: '#/components/parameters/ProductCode'
+
+    get:
+      tags: [Prodotti]
+      operationId: getProduct
+      summary: 7. Lettura dettagli di un prodotto 
+      responses:
+        "200":
+          description: Product completo
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/GeneralError'
+
+    patch:
+      tags: [Prodotti]
+      operationId: updateProduct
+      summary: 9. Modifica (anche parziale) di un prodotto
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Product"
+      responses:
+        "204":
+          description: Modifica effettuata
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/GeneralError'
+
+    delete:
+      tags: [Prodotti]
+      operationId: deleteProduct
+      summary: 10. Eliminazione di un prodotto
+      security:
+        - BearerAuth: []
+      responses:
+        "204":
+          description: Elemento eliminato
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/GeneralError'
+
+  /products/{productcode}/section:
+    put:
+      tags: [Prodotti]
+      operationId: moveProductToSection2
+      summary: 11b. Inserimento (o spostamento) di un prodotto in una sezione.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ProductCode'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SectionCode'
+      responses:
+        "204":
+          description: Prodotto assegnato alla sezione
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/GeneralError'
+
+
+  /products/{productcode}/image:
+    parameters:
+      - $ref: '#/components/parameters/ProductCode'
+    get:
+      tags: [Prodotti]
+      operationId: getProductImage
+      summary: 13. Scaricamento immagine (binaria) di un prodotto          
+      responses:
+        "200":
+          description: Immagine binaria
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/GeneralError'
+
+
+    put:
+      tags: [Prodotti]
+      operationId: updateProductImage
+      summary: 14. Inserimento/Aggiornamento immagine (binaria) di un prodotto
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          image/png:
+            schema:
+              type: string
+              format: binary
+      responses:
+        "204":
+          description: Immagine aggiornata
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/GeneralError'
